@@ -297,4 +297,4 @@ Calling this **"mesh-routed deferred settlement"** rather than "real-time offlin
 
 ---
 
-*Demo code — no license. Use freely for learning.*
+*MIT License.*
