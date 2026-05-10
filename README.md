@@ -2,7 +2,7 @@
 
 > **Mesh-routed deferred payment settlement over untrusted intermediaries** — a Spring Boot backend that demonstrates how UPI-style payments can survive zero-connectivity environments using Bluetooth-style gossip, hybrid encryption, and atomic idempotency.
 
-**Author:** Mukul &nbsp;|&nbsp; **Stack:** Java 17 · Spring Boot 3.3 · H2 · AES-GCM · RSA-OAEP
+**Live demo:** [upi-offline-mesh-production-5c2a.up.railway.app](https://upi-offline-mesh-production-5c2a.up.railway.app/) &nbsp;|&nbsp; **Author:** Mukul &nbsp;|&nbsp; **Stack:** Java 17 · Spring Boot 3.3 · H2 · AES-GCM · RSA-OAEP
 
 ---
 
