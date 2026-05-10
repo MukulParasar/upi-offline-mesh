@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UPI Offline Mesh — Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg:       #0a0e14;
+            --surface:  #111820;
+            --surface2: #161e28;
+            --border:   #1e2a38;
+            --border2:  #243040;
+            --text:     #cdd9e5;
+            --text-dim: #637589;
+            --text-faint: #3d5068;
+            --blue:     #4d9de0;
+            --blue-dim: #1a3a58;
+            --green:    #3dba6f;
+            --green-dim:#0d3320;
+            --red:      #e05252;
+            --yellow:   #e0aa3d;
+            --mono:     'JetBrains Mono', 'Consolas', monospace;
+            --sans:     'IBM Plex Sans', sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 28px 24px;
+        }
+
+        /* ── Layout ── */
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .header {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            color: #e8f0f8;
+            letter-spacing: -0.3px;
+        }
+        .header-tag {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--blue);
+            background: var(--blue-dim);
+            padding: 2px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.04em;
+        }
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* ── Cards ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .grid { display: grid; gap: 14px; }
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+
+        /* ── Section headings ── */
+        h2 {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+
+        /* ── Controls panel ── */
+        .controls {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+        .controls-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 16px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--blue-dim);
+            border: 1px solid var(--blue);
+            color: var(--blue);
+            font-size: 11px;
+            font-weight: 600;
+            font-family: var(--mono);
+            flex-shrink: 0;
+        }
+        .step-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            flex-shrink: 0;
+        }
+        .step-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .step-note {
+            font-size: 11px;
+            color: var(--text-faint);
+            margin-left: auto;
+        }
+
+        /* ── Inputs ── */
+        input, select {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 5px 9px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        input:focus, select:focus { border-color: var(--blue); }
+        input[type=number] { width: 90px; }
+        input[type=text]   { width: 72px; }
+
+        /* ── Buttons ── */
+        button {
+            font-family: var(--sans);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        button:active { transform: scale(0.97); }
+
+        button.primary   { background: var(--green); color: #fff; }
+        button.primary:hover { opacity: 0.88; }
+
+        button.secondary { background: var(--blue); color: #fff; }
+        button.secondary:hover { opacity: 0.88; }
+
+        button.danger    { background: var(--red); color: #fff; }
+        button.danger:hover { opacity: 0.88; }
+
+        /* default green (was original default) */
+        button:not(.primary):not(.secondary):not(.danger) {
+            background: var(--green);
+            color: #fff;
+        }
+        button:not(.primary):not(.secondary):not(.danger):hover { opacity: 0.88; }
+
+        /* ── Devices ── */
+        .device {
+            border: 1px solid var(--border2);
+            border-radius: 8px;
+            padding: 11px 13px;
+            margin-bottom: 8px;
+            background: var(--bg);
+            transition: border-color 0.2s;
+        }
+        .device.bridge {
+            border-color: var(--green);
+            background: var(--green-dim);
+        }
+        .device-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+        .device-name {
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 4px;
+            letter-spacing: 0.04em;
+        }
+        .badge-online  { background: var(--green); color: #fff; }
+        .badge-offline { background: var(--border2); color: var(--text-dim); }
+        .device-meta {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-left: auto;
+        }
+        .packet-id {
+            font-family: var(--mono);
+            font-size: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin: 2px 2px 0 0;
+            display: inline-block;
+            color: var(--blue);
+        }
+
+        /* ── Tables ── */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th {
+            text-align: left;
+            padding: 7px 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-faint);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        td {
+            text-align: left;
+            padding: 8px 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: var(--surface2); }
+
+        .balance {
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        /* status colours */
+        .status-SETTLED          { color: var(--green); font-weight: 600; font-family: var(--mono); font-size: 11px; }
+        .status-REJECTED         { color: var(--red);   font-weight: 600; font-family: var(--mono); font-size: 11px; }
+        .status-DUPLICATE_DROPPED{ color: var(--yellow);font-weight: 600; font-family: var(--mono); font-size: 11px; }
+        .status-INVALID          { color: var(--red);   font-weight: 600; font-family: var(--mono); font-size: 11px; }
+
+        .small { font-size: 11px; color: var(--text-dim); }
+        .mono  { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+
+        /* ── Log ── */
+        #log {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--green);
+            font-family: var(--mono);
+            font-size: 11px;
+            line-height: 1.7;
+            padding: 12px 14px;
+            max-height: 220px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        /* cache info */
+        #cacheInfo {
+            margin-top: 10px;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: var(--text-faint);
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>📡 UPI Offline Mesh</h1>
+        <span class="header-tag">LIVE DEMO</span>
+    </div>
+    <p class="subtitle">
+        Send money in a basement with zero internet. Encrypted packets gossip phone-to-phone
+        until a bridge device walks outside, hits 4G, and silently settles the payment.
+    </p>
+
+    <!-- Controls -->
+    <div class="controls">
+        <div class="controls-title">Demo Flow</div>
+
+        <div class="step">
+            <span class="step-num">1</span>
+            <span class="step-label">Compose payment</span>
+            <div class="step-controls">
+                <select id="senderVpa">
+                    <option>alice@demo</option>
+                    <option>bob@demo</option>
+                    <option>carol@demo</option>
+                </select>
+                <span style="color:var(--text-dim);font-size:13px">→</span>
+                <select id="receiverVpa">
+                    <option>bob@demo</option>
+                    <option>carol@demo</option>
+                    <option>alice@demo</option>
+                    <option>dave@demo</option>
+                </select>
+                <span style="color:var(--text-dim);font-size:13px">₹</span>
+                <input type="number" id="amount" value="500">
+                <span style="color:var(--text-dim);font-size:13px">PIN</span>
+                <input type="text" id="pin" value="1234" maxlength="4">
+                <button onclick="sendPacket()">📤 Inject into Mesh</button>
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-num">2</span>
+            <span class="step-label">Gossip round</span>
+            <div class="step-controls">
+                <button class="secondary" onclick="gossip()">🔄 Run Gossip Round</button>
+            </div>
+            <span class="step-note">packets hop device-to-device, TTL decrements per hop</span>
+        </div>
+
+        <div class="step">
+            <span class="step-num">3</span>
+            <span class="step-label">Bridge hits 4G</span>
+            <div class="step-controls">
+                <button class="secondary" onclick="flushBridges()">📡 Bridges Upload to Backend</button>
+            </div>
+            <span class="step-note">parallel uploads — exercises idempotency</span>
+        </div>
+
+        <div style="margin-top:10px">
+            <button class="danger" onclick="resetMesh()">🗑 Reset Mesh + Cache</button>
+        </div>
+    </div>
+
+    <!-- Mesh + Accounts -->
+    <div class="grid grid-2" style="margin-bottom:14px">
+        <div class="card">
+            <h2>Mesh Devices</h2>
+            <div id="devices"></div>
+        </div>
+        <div class="card">
+            <h2>Account Balances</h2>
+            <table id="accounts-table">
+                <thead>
+                <tr><th>VPA</th><th>Holder</th><th>Balance</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <p id="cacheInfo"></p>
+        </div>
+    </div>
+
+    <!-- Ledger -->
+    <div class="card" style="margin-bottom:14px">
+        <h2>Transaction Ledger</h2>
+        <table id="tx-table">
+            <thead>
+            <tr>
+                <th>ID</th><th>From</th><th>To</th><th>Amount</th>
+                <th>Status</th><th>Bridge</th><th>Hops</th><th>Settled</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Log -->
+    <div class="card">
+        <h2>Activity Log</h2>
+        <div id="log"></div>
+    </div>
+
+</div>
+
+<script>
+    function log(msg) {
+        const el = document.getElementById('log');
+        el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n' + el.textContent;
+    }
+
+    async function refresh() {
+        const m = await fetch('/api/mesh/state').then(r => r.json());
+        const devicesDiv = document.getElementById('devices');
+        devicesDiv.innerHTML = m.devices.map(d => `
+        <div class="device ${d.hasInternet ? 'bridge' : 'offline'}">
+            <div class="device-header">
+                <span class="device-name">${d.deviceId}</span>
+                <span class="badge ${d.hasInternet ? 'badge-online' : 'badge-offline'}">
+                    ${d.hasInternet ? '🌐 4G' : '✕ OFFLINE'}
+                </span>
+                <span class="device-meta">${d.packetCount} packet(s)</span>
+            </div>
+            <div>${d.packetIds.map(id => `<span class="packet-id">${id}</span>`).join('')}</div>
+        </div>
+    `).join('');
+        document.getElementById('cacheInfo').textContent =
+            `idempotency cache: ${m.idempotencyCacheSize} entries`;
+
+        const accs = await fetch('/api/accounts').then(r => r.json());
+        document.querySelector('#accounts-table tbody').innerHTML = accs.map(a => `
+        <tr>
+            <td class="mono">${a.vpa}</td>
+            <td>${a.holderName}</td>
+            <td class="balance">₹${parseFloat(a.balance).toFixed(2)}</td>
+        </tr>
+    `).join('');
+
+        const txs = await fetch('/api/transactions').then(r => r.json());
+        document.querySelector('#tx-table tbody').innerHTML = txs.map(t => `
+        <tr>
+            <td class="mono">${t.id}</td>
+            <td class="mono">${t.senderVpa}</td>
+            <td class="mono">${t.receiverVpa}</td>
+            <td class="balance">₹${parseFloat(t.amount).toFixed(2)}</td>
+            <td class="status-${t.status}">${t.status}</td>
+            <td class="mono">${t.bridgeNodeId}</td>
+            <td class="mono">${t.hopCount}</td>
+            <td class="small">${new Date(t.settledAt).toLocaleTimeString()}</td>
+        </tr>
+    `).join('');
+    }
+
+    async function sendPacket() {
+        const body = {
+            senderVpa: document.getElementById('senderVpa').value,
+            receiverVpa: document.getElementById('receiverVpa').value,
+            amount: parseFloat(document.getElementById('amount').value),
+            pin: document.getElementById('pin').value,
+            ttl: 5,
+            startDevice: 'phone-alice'
+        };
+        const r = await fetch('/api/demo/send', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        }).then(r => r.json());
+        log(`📤 Packet ${r.packetId.substring(0,8)} encrypted & injected at ${r.injectedAt} (TTL ${r.ttl})`);
+        log(`   ciphertext (truncated): ${r.ciphertextPreview}`);
+        refresh();
+    }
+
+    async function gossip() {
+        const r = await fetch('/api/mesh/gossip', {method: 'POST'}).then(r => r.json());
+        log(`🔄 Gossip: ${r.transfers} transfer(s) — ${JSON.stringify(r.deviceCounts)}`);
+        refresh();
+    }
+
+    async function flushBridges() {
+        const r = await fetch('/api/mesh/flush', {method: 'POST'}).then(r => r.json());
+        log(`📡 ${r.uploadsAttempted} bridge upload(s):`);
+        r.results.forEach(res => {
+            log(`   ${res.bridgeNode} packet ${res.packetId} → ${res.outcome}` +
+                (res.reason ? ` (${res.reason})` : ''));
+        });
+        refresh();
+    }
+
+    async function resetMesh() {
+        await fetch('/api/mesh/reset', {method: 'POST'});
+        log('🗑 mesh + idempotency cache cleared');
+        refresh();
+    }
+
+    refresh();
+    setInterval(refresh, 3000);
+</script>
+</body>
+</html>
