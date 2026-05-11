@@ -8,7 +8,7 @@
 
 ## Why I built this
 
-I got curious about how UPI Lite handles offline payments — specifically, what happens when there's no internet anywhere in the chain. The hard problems turned out to be interesting enough to build: how do you stop strangers from reading your payment as they relay it? How do you prevent the same packet from settling twice when five phones all upload it simultaneously? This project is my answer to those questions.
+I got curious about how UPI Lite handles offline payments — specifically, what happens when there's no internet anywhere in the chain. Studied an existing open codebase (with the author's permission) to deeply understand the hard problems: untrusted relays, duplicate storms, and replay attacks. Every design decision in this system is documented and understood.
 
 ---
 
@@ -294,6 +294,12 @@ Calling this **"mesh-routed deferred settlement"** rather than "real-time offlin
 | First run hangs | Downloading Maven + deps (~90 MB). Wait 2–3 min; subsequent starts are ~5 s |
 | `mvnw.cmd not recognized` on PowerShell | Prefix with `.\` → `.\mvnw.cmd spring-boot:run` |
 | Concurrency test flakes | Timing-sensitive. Run 3× — consistent failure means file an issue with the output |
+
+---
+
+## Acknowledgements
+Original codebase used with the author's permission. 
+Studied, documented, and extended with UI improvements by me.
 
 ---
 
